@@ -21,12 +21,22 @@ with DAG(
     tags=["dbt", "inpatient"],
 ) as dag:
 
-    dbt_run = BashOperator(
-        task_id="dbt_run",
+    dbt_silver = BashOperator(
+        task_id="dbt_silver",
         bash_command=f"""
         cd {DBT_PROJECT_PATH} &&
-        dbt run
-        """)
+        dbt run --select silver
+        """
+    )
+
+    dbt_gold = BashOperator(
+        task_id="dbt_gold",
+        bash_command=f"""
+        cd {DBT_PROJECT_PATH} &&
+        dbt run --select gold
+        """
+    )
+
     dbt_test = BashOperator(
         task_id="dbt_test",
         bash_command=f"""
@@ -34,4 +44,5 @@ with DAG(
         dbt test
         """
     )
-    dbt_run >> dbt_test
+
+    dbt_silver >> dbt_gold >> dbt_test
