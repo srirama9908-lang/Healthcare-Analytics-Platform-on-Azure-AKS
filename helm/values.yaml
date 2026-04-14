@@ -1,32 +1,41 @@
-executor: SequentialExecutor
+executor: CeleryExecutor
 
-# ✅ Static API key (removes warning)
-api:
-  secretKey: "my-super-static-api-key-123"
-
-# ✅ Required secrets (Helm will create them)
-fernetKey: "abcdefghijklmnopqrstuvwxyz123456"
+fernetKey: "9KJ6htugZBkj1fx0tyC-TihllprmknF32agnpHFt9_o="
 webserverSecretKey: "mywebserversecret123"
-jwtSecret: "myjwtsecret123"
 
-# ✅ Your custom Airflow + dbt image
 images:
   airflow:
     repository: srinivasa594/airflow-dbt
     tag: latest
     pullPolicy: Always
 
-# ✅ Enable API server (this is your UI in Airflow 3)
 apiServer:
   enabled: true
 
+# ✅ FIX: use global env (your chart supports this)
+env:
+  - name: CELERYD_NODENAME
+    value: "worker@%h"
+
 postgresql:
   enabled: true
+  auth:
+    username: airflow
+    password: airflow
+    database: airflow
+
+  primary:
+    persistence:
+      enabled: false
+
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: latest
 
 redis:
-  enabled: false
+  enabled: true
 
-# ✅ DAGs from GitHub
 dags:
   persistence:
     enabled: false
@@ -35,25 +44,7 @@ dags:
     repo: https://github.com/srirama9908-lang/Inpatient_snoeflakedbt.git
     branch: master
     subPath: airflow/dags
-    mountPath: /opt/airflow/dags
 
 logs:
   persistence:
     enabled: false
-
-# (webserver is not needed in Airflow 3, but safe to keep)
-webserver:
-  enabled: false
-
-# ✅ Resource configs
-scheduler:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-triggerer:
-  resources:
-    requests:
-      cpu: 50m
-      memory: 64Mi
