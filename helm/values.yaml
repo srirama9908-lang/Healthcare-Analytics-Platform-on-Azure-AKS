@@ -1,28 +1,51 @@
 executor: SequentialExecutor
 
+# ✅ Static API key (removes warning)
+api:
+  secretKey: "my-super-static-api-key-123"
+
+# ✅ Required secrets (Helm will create them)
+fernetKey: "abcdefghijklmnopqrstuvwxyz123456"
+webserverSecretKey: "mywebserversecret123"
+jwtSecret: "myjwtsecret123"
+
+# ✅ Your custom Airflow + dbt image
+images:
+  airflow:
+    repository: srinivasa594/airflow-dbt
+    tag: latest
+    pullPolicy: Always
+
+# ✅ Enable API server (this is your UI in Airflow 3)
+apiServer:
+  enabled: true
+
 postgresql:
   enabled: true
 
 redis:
   enabled: false
 
+# ✅ DAGs from GitHub
 dags:
   persistence:
     enabled: false
   gitSync:
     enabled: true
     repo: https://github.com/srirama9908-lang/Inpatient_snoeflakedbt.git
-    branch: main
-    subPath: dags
+    branch: master
+    subPath: airflow/dags
+    mountPath: /opt/airflow/dags
 
 logs:
   persistence:
     enabled: false
 
+# (webserver is not needed in Airflow 3, but safe to keep)
 webserver:
-  service:
-    type: LoadBalancer
+  enabled: false
 
+# ✅ Resource configs
 scheduler:
   resources:
     requests:
